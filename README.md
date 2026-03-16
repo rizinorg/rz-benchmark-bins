@@ -1,4 +1,4 @@
-# Rizin's Binary Analysis Test Binaries
+# Rizin's Binary Analysis Benchmark Binaries
 
 This repository contains scripts to build binaries for several different architectures.
 The binaries are meant for comparative testing of Rizin's and other
@@ -14,13 +14,24 @@ Simply because it has a good collection out-of-the-box working cross compilers w
 The sysroots of the cross compilers should be located at `/usr/<TARGET>/`.
 Where `<TARGET>` is _usually_ of the form `<arch>-<os>-<abi>` (example: `powerpc-linux-gnu`).
 
+### Install dependencies
+
+```bash
+uv venv
+source .venv/bin/activate
+uv sync
+# Hexagon
+sudo apt install musl zstd
+```
+
 ### Install cross compilers
 
 ```bash
 sudo apt install crossbuild-essential-* build-essential
 # Hexagon
-sudo apt install musl zstd
-./setup_hexagon_toolchain.py
+# Optional: Use --copy to copy toolchain to /usr/
+# This will ask for root.
+./setup_hexagon_toolchain.py --copy
 ```
 
 ### Clean up everything (delete all untracked files)

@@ -2,19 +2,12 @@
 
 import os
 import sys
-import hashlib
 import shutil
 import subprocess
-import urllib.request
 import tarfile
 import argparse
 from pathlib import Path
-
-# Configuration
-BASE_DIR = Path(__file__).parent.resolve()
-SRC_DIR = BASE_DIR / "src"
-ARCHIVES_DIR = BASE_DIR / "archives"
-TARGETS_DIR = BASE_DIR / "targets"
+from helpers import get_supported_targets, check_sha256, BASE_DIR, SRC_DIR, ARCHIVES_DIR, TARGETS_DIR
 
 VERSION = "2.46.0"
 BINUTILS_NAME = f"binutils-{VERSION}"
@@ -22,25 +15,7 @@ ARCHIVE_NAME = f"{BINUTILS_NAME}.tar.gz"
 ARCHIVE_URL = f"https://sourceware.org/pub/binutils/releases/{ARCHIVE_NAME}"
 ARCHIVE_SHA256 = "8608fe44ab7de645f6ad0a898313b75338842490d609adb85c9fb2827c376af2"
 
-SUPPORTED_TARGETS = [
-    "aarch64-linux-gnu",
-    "arm-linux-gnueabi",
-    "arm-linux-gnueabihf",
-    "i686-linux-gnu",
-    "mips64el-linux-gnuabi64",
-    "mips64-linux-gnuabi64",
-    "mipsel-linux-gnu",
-    "mipsisa32r6el-linux-gnu",
-    "mipsisa32r6-linux-gnu",
-    "mipsisa64r6el-linux-gnuabi64",
-    "mipsisa64r6-linux-gnuabi64",
-    "mips-linux-gnu",
-    "powerpc64le-linux-gnu",
-    "powerpc-linux-gnu",
-    "riscv64-linux-gnu",
-    "s390x-linux-gnu",
-    "LOCAL_MACHINE",
-]
+SUPPORTED_TARGETS = get_supported_targets()
 
 def log(msg):
     print(f"============================")
@@ -50,22 +25,17 @@ def log(msg):
 def prepare_source():
     """Download and extract binutils source."""
     archive_path = ARCHIVES_DIR / ARCHIVE_NAME
-    source_path = SRC_DIR / BINUTILS_NAME
 
     ARCHIVES_DIR.mkdir(parents=True, exist_ok=True)
     SRC_DIR.mkdir(parents=True, exist_ok=True)
 
     if not archive_path.exists():
         print(f"Downloading {ARCHIVE_NAME}...")
-        urllib.request.urlretrieve(ARCHIVE_URL, archive_path)
-        with open(archive_path, "rb") as f:
-            digest = hashlib.file_digest(f, "sha256")
-        if digest.hexdigest() != ARCHIVE_SHA256:
-            print("tar archive sha mismatches!")
-            print(f"is:       {digest.hexdigest()}")
-            print(f"expected: {ARCHIVE_SHA256}")
-            exit(-1)
+        subprocess.run(["curl", "-Lfo", archive_path, ARCHIVE_URL], check=True)
 
+    check_sha256(archive_path, ARCHIVE_SHA256)
+
+    source_path = SRC_DIR / BINUTILS_NAME
     if not source_path.exists():
         print(f"Extracting {ARCHIVE_NAME}...")
         with tarfile.open(archive_path, "r:gz") as tar:

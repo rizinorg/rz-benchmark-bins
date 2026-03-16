@@ -4,4 +4,7 @@ src/*
 !src/README.md
 targets/*
 !targets/README.md
+toolchains/*
+!toolchains/README.md
+__pycache__
 
