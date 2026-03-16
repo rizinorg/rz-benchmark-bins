@@ -11,7 +11,7 @@ import subprocess
 import tarfile
 import argparse
 from pathlib import Path
-from target import get_supported_targets
+from toolchain import get_supported_targets, LOCAL_MACHINE
 from helpers import (
     check_sha256,
     SRC_DIR,
@@ -62,7 +62,7 @@ def build_target(target):
     )
 
     config_cmd = ["./configure", "--disable-shared"]
-    if target != "LOCAL_MACHINE":
+    if target != LOCAL_MACHINE:
         config_cmd.append(f"--host={target}")
 
     subprocess.run(config_cmd, check=True)
@@ -104,7 +104,7 @@ def copy_executables(target):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("target", nargs="?", help="Target architecture")
-    parser.add_argument("-l", action="store_true", help="List targets")
+    parser.add_argument("-l", action="store_true", help="List target toolchains")
     args = parser.parse_args()
 
     targets = get_supported_targets()

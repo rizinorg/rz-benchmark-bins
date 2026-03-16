@@ -3,7 +3,8 @@
 # SPDX-FileCopyrightText: 2026 2026 Rot127 <rot127@posteo.com>
 #
 # SPDX-License-Identifier: LGPL-3.0-only
-from target import Target
+
+from toolchain import Toolchain, ToolchainType
 
 from tarfile import CompressionError
 import shutil
@@ -88,8 +89,8 @@ def toolchain_present() -> bool:
     return (TOOLCHAINS_DIR / HEXAGON_TARGET_NAME).exists()
 
 
-def get_target() -> Target:
-    return Target(name=HEXAGON_TARGET_NAME, packaged=False)
+def get_target() -> Toolchain:
+    return Toolchain(name=HEXAGON_TARGET_NAME, toolchain_type=ToolchainType.CrossExtern)
 
 
 if __name__ == "__main__":

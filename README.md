@@ -50,7 +50,7 @@ git clean -dfx targets/ src/ archives/
 # Builds a single architecuture
 ./build_binutils_variants.py arm-linux-gnu
 # Builds a for the local machine
-./build_binutils_variants.py LOCAL_MACHINE
+./build_binutils_variants.py "$(uname -m)"
 ```
 
 ### Lint
