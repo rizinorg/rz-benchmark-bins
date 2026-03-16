@@ -1,0 +1,32 @@
+# Partially vibe coded with Kagi Assistant
+name: Lint
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    name: Ruff & ty
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          activate-environment: "true"
+
+      - name: Install tools
+        run: uv pip install ruff ty
+
+      - name: Run Ruff linter
+        run: ruff check .
+
+      - name: Run Ruff formatter check
+        run: ruff format --check .
+
+      - name: Run ty type checker
+        run: ty check .

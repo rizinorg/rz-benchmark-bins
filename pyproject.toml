@@ -1,0 +1,10 @@
+[project]
+name = "rz-benchmark-bins"
+version = "0.1.0"
+description = "Rizin's Binary Analysis Benchmark Binaries"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "ruff>=0.15.6",
+    "ty>=0.0.23",
+]

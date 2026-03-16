@@ -27,9 +27,11 @@ SUPPORTED_TARGETS = [
     "LOCAL_MACHINE",
 ]
 
+
 def get_supported_targets():
     # if Path("/usr/")
     return SUPPORTED_TARGETS
+
 
 def check_sha256(file, expected_sha256):
     with open(file, "rb") as f:

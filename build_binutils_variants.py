@@ -7,7 +7,13 @@ import subprocess
 import tarfile
 import argparse
 from pathlib import Path
-from helpers import get_supported_targets, check_sha256, BASE_DIR, SRC_DIR, ARCHIVES_DIR, TARGETS_DIR
+from helpers import (
+    get_supported_targets,
+    check_sha256,
+    SRC_DIR,
+    ARCHIVES_DIR,
+    TARGETS_DIR,
+)
 
 VERSION = "2.46.0"
 BINUTILS_NAME = f"binutils-{VERSION}"
@@ -17,10 +23,12 @@ ARCHIVE_SHA256 = "8608fe44ab7de645f6ad0a898313b75338842490d609adb85c9fb2827c376a
 
 SUPPORTED_TARGETS = get_supported_targets()
 
+
 def log(msg):
-    print(f"============================")
+    print("============================")
     print(msg)
-    print(f"============================")
+    print("============================")
+
 
 def prepare_source():
     """Download and extract binutils source."""
@@ -41,14 +49,14 @@ def prepare_source():
         with tarfile.open(archive_path, "r:gz") as tar:
             tar.extractall(SRC_DIR, filter="tar")
 
+
 def build_target(target):
     """Configure, make, and copy outputs for a specific target."""
     log(f"Building for target: {target}")
 
     subprocess.run(["make", "clean"], check=False)
     subprocess.run(
-        ["find", ".", "-type", "f", "-name", "config.cache", "-delete"],
-        check=False
+        ["find", ".", "-type", "f", "-name", "config.cache", "-delete"], check=False
     )
 
     config_cmd = ["./configure", "--disable-shared"]
@@ -59,6 +67,7 @@ def build_target(target):
     subprocess.run(["make"], check=True)
 
     log(f"Build done for {target}")
+
 
 def copy_executables(target):
     """Copy relevant executables to the target directory."""
@@ -76,28 +85,24 @@ def copy_executables(target):
             continue
 
         result = subprocess.run(
-            ["file", str(f)],
-            capture_output=True,
-            text=True,
-            check=False
+            ["file", str(f)], capture_output=True, text=True, check=False
         )
 
-        if result.stdout and "ELF" in result.stdout and local_arch not in result.stdout.lower():
+        if (
+            result.stdout
+            and "ELF" in result.stdout
+            and local_arch not in result.stdout.lower()
+        ):
             print(f"{f} -> {output_dir}")
             shutil.copy(f, output_dir)
 
     log(f"Build and copy for {target} complete.")
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("target", nargs="?", help="Target architecture")
-    try:
-        args = parser.parse_args()
-    except:
-        print("\nSupported targets:")
-        for t in SUPPORTED_TARGETS:
-            print(f"\t{t}")
-        sys.exit(0)
+    args = parser.parse_args()
 
     targets = SUPPORTED_TARGETS
     if args.target:
@@ -105,7 +110,7 @@ def main():
             print(f"Unsupported target: {args.target}")
             print("Supported targets:")
             for t in SUPPORTED_TARGETS:
-                print(t)
+                print(f"\t{t}")
             sys.exit(1)
         targets = [args.target]
 
@@ -115,6 +120,7 @@ def main():
     for target in targets:
         build_target(target)
         copy_executables(target)
+
 
 if __name__ == "__main__":
     main()
