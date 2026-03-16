@@ -11,9 +11,6 @@ The comparison tool can be found at https://github.com/rizinorg/rz-framework-cmp
 Scripts here require a **Debian**.
 Simply because it has a good collection out-of-the-box working cross compilers with `libc`.
 
-The sysroots of the cross compilers should be located at `/usr/<TARGET>/`.
-Where `<TARGET>` is _usually_ of the form `<arch>-<os>-<abi>` (example: `powerpc-linux-gnu`).
-
 ### Install dependencies
 
 ```bash
@@ -28,10 +25,7 @@ sudo apt install musl zstd
 
 ```bash
 sudo apt install crossbuild-essential-* build-essential
-# Hexagon
-# Optional: Use --copy to copy toolchain to /usr/
-# This will ask for root.
-./setup_hexagon_toolchain.py --copy
+./setup_hexagon_toolchain.py
 ```
 
 ### Clean up everything (delete all untracked files)
