@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 2026 Rot127 <rot127@posteo.com>
+
+SPDX-License-Identifier: LGPL-3.0-only
+-->
+
 # Rizin's Binary Analysis Benchmark Binaries
 
 This repository contains scripts to build binaries for several different architectures.

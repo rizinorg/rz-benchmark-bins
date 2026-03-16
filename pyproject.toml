@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 2026 Rot127 <rot127@posteo.com>
+#
+# SPDX-License-Identifier: LGPL-3.0-only
+
 [project]
 name = "rz-benchmark-bins"
 version = "0.1.0"
@@ -5,6 +9,7 @@ description = "Rizin's Binary Analysis Benchmark Binaries"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "reuse>=6.2.0",
     "ruff>=0.15.6",
     "ty>=0.0.23",
 ]

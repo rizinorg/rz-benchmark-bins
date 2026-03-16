@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2026 2026 Rot127 <rot127@posteo.com>
+#
+# SPDX-License-Identifier: LGPL-3.0-only
+
 import os
 import sys
 import shutil

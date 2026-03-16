@@ -1,0 +1,28 @@
+version = 3
+SPDX-PackageName = "rz-benchmark-bins"
+SPDX-PackageSupplier = "RizinOrg <info@rizin.re>"
+SPDX-PackageDownloadLocation = "https://github.com/rizinorg/rz-benchmark-bins"
+
+[[annotations]]
+path = ".github/workflows/lint.yml"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Rot127 <rot127@posteo.com>"
+SPDX-License-Identifier = "LGPL-3.0-only"
+
+[[annotations]]
+path = ".gitignore"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Rot127 <rot127@posteo.com>"
+SPDX-License-Identifier = "LGPL-3.0-only"
+
+[[annotations]]
+path = ".python-version"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Rot127 <rot127@posteo.com>"
+SPDX-License-Identifier = "LGPL-3.0-only"
+
+[[annotations]]
+path = "uv.lock"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Rot127 <rot127@posteo.com>"
+SPDX-License-Identifier = "LGPL-3.0-only"
