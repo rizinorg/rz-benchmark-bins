@@ -53,3 +53,11 @@ git clean -dfx targets/ src/ archives/
 ./build_binutils_variants.py LOCAL_MACHINE
 ```
 
+### Lint
+
+```bash
+ruff check .
+ruff format --check .
+ty check .
+reuse lint
+```
