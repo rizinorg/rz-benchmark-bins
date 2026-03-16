@@ -11,8 +11,8 @@ import subprocess
 import tarfile
 import argparse
 from pathlib import Path
+from target import get_supported_targets
 from helpers import (
-    get_supported_targets,
     check_sha256,
     SRC_DIR,
     ARCHIVES_DIR,
@@ -24,8 +24,6 @@ BINUTILS_NAME = f"binutils-{VERSION}"
 ARCHIVE_NAME = f"{BINUTILS_NAME}.tar.gz"
 ARCHIVE_URL = f"https://sourceware.org/pub/binutils/releases/{ARCHIVE_NAME}"
 ARCHIVE_SHA256 = "8608fe44ab7de645f6ad0a898313b75338842490d609adb85c9fb2827c376af2"
-
-SUPPORTED_TARGETS = get_supported_targets()
 
 
 def log(msg):
@@ -106,14 +104,17 @@ def copy_executables(target):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("target", nargs="?", help="Target architecture")
+    parser.add_argument("-l", action="store_true", help="List targets")
     args = parser.parse_args()
 
-    targets = SUPPORTED_TARGETS
-    if args.target:
-        if args.target not in SUPPORTED_TARGETS:
-            print(f"Unsupported target: {args.target}")
+    targets = get_supported_targets()
+    if args.l or args.target:
+        if args.l or args.target not in targets:
+            if not args.l:
+                print(f"Unsupported target: {args.target}\n")
+
             print("Supported targets:")
-            for t in SUPPORTED_TARGETS:
+            for t in targets:
                 print(f"\t{t}")
             sys.exit(1)
         targets = [args.target]

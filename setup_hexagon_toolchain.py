@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: 2026 2026 Rot127 <rot127@posteo.com>
 #
 # SPDX-License-Identifier: LGPL-3.0-only
+from target import Target
 
 from tarfile import CompressionError
 import shutil
@@ -15,6 +16,7 @@ import sys
 from helpers import check_sha256, ARCHIVES_DIR, TOOLCHAINS_DIR
 
 HEXAGON_TARGET_NAME = "hexagon-unknown-linux-musl"
+TOOLCHAIN_NAME = Path("clang+llvm-22.1.0-cross-hexagon-unknown-linux-musl")
 
 
 def get_architecture():
@@ -41,8 +43,7 @@ def main():
     # Determine the correct file based on local architecture
     base_url = "https://artifacts.codelinaro.org/artifactory/codelinaro-toolchain-for-hexagon/22.1.0_/"
     sha, arch = get_architecture()
-    toolchain_name = Path("clang+llvm-22.1.0-cross-hexagon-unknown-linux-musl")
-    file_name = f"{toolchain_name}_{arch}"
+    file_name = f"{TOOLCHAIN_NAME}_{arch}"
     archive_name = f"{file_name}.tar.zst"
     url = base_url + archive_name
 
@@ -57,7 +58,7 @@ def main():
     check_sha256(archive_path, sha)
 
     if (
-        not (TOOLCHAINS_DIR / toolchain_name).exists()
+        not (TOOLCHAINS_DIR / TOOLCHAIN_NAME).exists()
         and not (TOOLCHAINS_DIR / HEXAGON_TARGET_NAME).exists()
     ):
         print(f"Unpacking {archive_path}...")
@@ -73,14 +74,22 @@ def main():
             else:
                 raise e
 
-    if (TOOLCHAINS_DIR / toolchain_name).exists():
-        print(f"Move {toolchain_name} -> {HEXAGON_TARGET_NAME}")
+    if (TOOLCHAINS_DIR / TOOLCHAIN_NAME).exists():
+        print(f"Move {TOOLCHAIN_NAME} -> {HEXAGON_TARGET_NAME}")
         # Move the toolchain dir in clang+llvm-.... to the target name dir.
         shutil.move(
-            TOOLCHAINS_DIR / toolchain_name / arch,
+            TOOLCHAINS_DIR / TOOLCHAIN_NAME / arch,
             TOOLCHAINS_DIR / HEXAGON_TARGET_NAME,
         )
-        shutil.rmtree(TOOLCHAINS_DIR / toolchain_name)
+        shutil.rmtree(TOOLCHAINS_DIR / TOOLCHAIN_NAME)
+
+
+def toolchain_present() -> bool:
+    return (TOOLCHAINS_DIR / HEXAGON_TARGET_NAME).exists()
+
+
+def get_target() -> Target:
+    return Target(name=HEXAGON_TARGET_NAME, packaged=False)
 
 
 if __name__ == "__main__":
