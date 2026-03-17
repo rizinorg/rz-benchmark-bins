@@ -12,7 +12,13 @@ from pathlib import Path
 import platform
 import subprocess
 import sys
-from helpers import check_sha256, ARCHIVES_DIR, TOOLCHAINS_DIR, unpack_tar
+from helpers import (
+    check_sha256,
+    ARCHIVES_DIR,
+    TOOLCHAINS_DIR,
+    unpack_tar,
+    curl_download,
+)
 
 HEXAGON_TARGET_NAME = "hexagon-unknown-linux-musl"
 TOOLCHAIN_NAME = Path("clang+llvm-22.1.0-cross-hexagon-unknown-linux-musl")
@@ -49,12 +55,7 @@ def main():
     print(f"Archive: {archive_name}")
 
     archive_path = ARCHIVES_DIR / archive_name
-    if not archive_path.exists():
-        print(f"Downloading from {url}...")
-        subprocess.run(["curl", "-Lfo", archive_path, url], check=True)
-        print("Download complete.")
-
-    check_sha256(archive_path, sha)
+    curl_download(url, archive_path, sha)
 
     if (
         not (TOOLCHAINS_DIR / TOOLCHAIN_NAME).exists()

@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 2026 Rot127 <rot127@posteo.com>
 #
 # SPDX-License-Identifier: LGPL-3.0-only
+import subprocess
 from tarfile import CompressionError
 
 import hashlib
@@ -14,14 +15,15 @@ TOOLCHAINS_DIR = BASE_DIR / "toolchains"
 TARGETS_DIR = BASE_DIR / "targets"
 
 
-def check_sha256(file, expected_sha256):
+def check_sha256(file, expected_sha256) -> bool:
     with open(file, "rb") as f:
         digest = hashlib.file_digest(f, "sha256")
     if digest.hexdigest() != expected_sha256:
         print(f"File hashes of '{file}' mismatch!")
         print(f"is:       {digest.hexdigest()}")
         print(f"expected: {expected_sha256}")
-        exit(-1)
+        return False
+    return True
 
 
 def unpack_tar(archive_file: Path, out_path: Path):
@@ -37,3 +39,18 @@ def unpack_tar(archive_file: Path, out_path: Path):
             exit(1)
         else:
             raise e
+
+
+def curl_download(url, out_file, hash):
+    if out_file.exists():
+        if check_sha256(out_file, hash):
+            return
+        print(f"\nRedownload from {url}...")
+    else:
+        print(f"\nDownloading from {url}...")
+
+    subprocess.run(["curl", "-Lfo", out_file, url], check=True)
+    print("Download complete.")
+    if not check_sha256(out_file, hash):
+        # Fail if downloaded archive mismatches.
+        exit(-1)

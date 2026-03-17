@@ -17,6 +17,7 @@ from helpers import (
     SRC_DIR,
     ARCHIVES_DIR,
     TARGETS_DIR,
+    curl_download,
 )
 
 VERSION = "2.46.0"
@@ -39,11 +40,7 @@ def prepare_source():
     ARCHIVES_DIR.mkdir(parents=True, exist_ok=True)
     SRC_DIR.mkdir(parents=True, exist_ok=True)
 
-    if not archive_path.exists():
-        print(f"Downloading {ARCHIVE_NAME}...")
-        subprocess.run(["curl", "-Lfo", archive_path, ARCHIVE_URL], check=True)
-
-    check_sha256(archive_path, ARCHIVE_SHA256)
+    curl_download(ARCHIVE_URL, archive_path, ARCHIVE_SHA256)
 
     src_dir = SRC_DIR / BINUTILS_NAME
     if not src_dir.exists():
