@@ -6,15 +6,13 @@
 
 from toolchain import Toolchain, ToolchainType
 
-from tarfile import CompressionError
 import shutil
 
 from pathlib import Path
 import platform
 import subprocess
-import tarfile
 import sys
-from helpers import check_sha256, ARCHIVES_DIR, TOOLCHAINS_DIR
+from helpers import check_sha256, ARCHIVES_DIR, TOOLCHAINS_DIR, unpack_tar
 
 HEXAGON_TARGET_NAME = "hexagon-unknown-linux-musl"
 TOOLCHAIN_NAME = Path("clang+llvm-22.1.0-cross-hexagon-unknown-linux-musl")
@@ -62,18 +60,7 @@ def main():
         not (TOOLCHAINS_DIR / TOOLCHAIN_NAME).exists()
         and not (TOOLCHAINS_DIR / HEXAGON_TARGET_NAME).exists()
     ):
-        print(f"Unpacking {archive_path}...")
-        try:
-            with tarfile.open(archive_path, "r:zst") as tar:
-                tar.extractall(TOOLCHAINS_DIR, filter="tar")
-        except CompressionError as e:
-            if "zst" in str(e):
-                print(
-                    "ztsd is not supported by tarfile. Please check if you are using Python 3.14"
-                )
-                exit(1)
-            else:
-                raise e
+        unpack_tar(archive_path, TOOLCHAINS_DIR)
 
     if (TOOLCHAINS_DIR / TOOLCHAIN_NAME).exists():
         print(f"Move {TOOLCHAIN_NAME} -> {HEXAGON_TARGET_NAME}")

@@ -8,11 +8,11 @@ import os
 import sys
 import shutil
 import subprocess
-import tarfile
 import argparse
 from pathlib import Path
 from toolchain import get_supported_targets, LOCAL_MACHINE
 from helpers import (
+    unpack_tar,
     check_sha256,
     SRC_DIR,
     ARCHIVES_DIR,
@@ -45,11 +45,9 @@ def prepare_source():
 
     check_sha256(archive_path, ARCHIVE_SHA256)
 
-    source_path = SRC_DIR / BINUTILS_NAME
-    if not source_path.exists():
-        print(f"Extracting {ARCHIVE_NAME}...")
-        with tarfile.open(archive_path, "r:gz") as tar:
-            tar.extractall(SRC_DIR, filter="tar")
+    src_dir = SRC_DIR / BINUTILS_NAME
+    if not src_dir.exists():
+        unpack_tar(archive_path, SRC_DIR)
 
 
 def build_target(target):
