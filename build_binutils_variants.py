@@ -96,7 +96,7 @@ def build_target(toolchain: Toolchain):
 
 def copy_executables(toolchain: Toolchain):
     """Copy relevant executables to the target directory."""
-    output_dir = TARGETS_DIR / str(toolchain) / BINUTILS_NAME
+    output_dir = TARGETS_DIR / str(toolchain.target_name) / BINUTILS_NAME
     output_dir.mkdir(parents=True, exist_ok=True)
 
     local_arch = os.uname().machine.replace("_", "-").lower()
@@ -121,7 +121,7 @@ def copy_executables(toolchain: Toolchain):
             print(f"{f} -> {output_dir}")
             shutil.copy(f, output_dir)
 
-    log(f"Build and copy for {toolchain} complete.")
+    log(f"Build and copy for {toolchain.target_name} complete.")
 
 
 def main():
