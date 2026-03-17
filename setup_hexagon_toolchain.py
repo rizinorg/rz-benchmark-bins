@@ -10,10 +10,8 @@ import shutil
 
 from pathlib import Path
 import platform
-import subprocess
 import sys
 from helpers import (
-    check_sha256,
     ARCHIVES_DIR,
     TOOLCHAINS_DIR,
     unpack_tar,
@@ -62,6 +60,8 @@ def main():
         and not (TOOLCHAINS_DIR / HEXAGON_TARGET_NAME).exists()
     ):
         unpack_tar(archive_path, TOOLCHAINS_DIR)
+    else:
+        print("Toolchain was already extracted.")
 
     if (TOOLCHAINS_DIR / TOOLCHAIN_NAME).exists():
         print(f"Move {TOOLCHAIN_NAME} -> {HEXAGON_TARGET_NAME}")
