@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: 2026 2026 Rot127 <rot127@posteo.com>
 #
 # SPDX-License-Identifier: LGPL-3.0-only
+from setup_hexagon_toolchain import HEXAGON_TARGET_NAME
 
 import os
 import sys
@@ -145,6 +146,9 @@ def main():
 
     os.chdir(SRC_DIR / BINUTILS_NAME)
     for tc in toolchains:
+        if tc.target_name in [HEXAGON_TARGET_NAME]:
+            print(f"A {tc} build for binutils is broken currently.")
+            continue
         build_target(tc)
         copy_executables(tc)
 
