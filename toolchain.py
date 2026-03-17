@@ -23,17 +23,15 @@ class Toolchain:
         toolchain_type: ToolchainType,
         sysroot: Path | None = None,
         env: dict[str, str] | None = None,
-        path: str | None = None,
         inc_dirs: list[str] | None = None,
     ):
         self.toolchain_type: ToolchainType = toolchain_type
         self.target_name: str = target_name
         self.sysroot = sysroot
 
+        # The environment to use. Overwrites the process environment.
         self.env = env
         self.inc_dirs = inc_dirs
-        # A string to add to the PATH env variable during build
-        self.path = path
 
     def __str__(self):
         return f"{self.target_name} ({self.toolchain_type})"

@@ -60,7 +60,6 @@ def build_target(toolchain: Toolchain):
         ["find", ".", "-type", "f", "-name", "config.cache", "-delete"], check=False
     )
 
-    env = dict()
     config_cmd = [
         "./configure",
         "--disable-shared",
@@ -74,10 +73,9 @@ def build_target(toolchain: Toolchain):
             config_cmd.append(f"--includedir={d}")
 
     if toolchain.env:
-        env.update(toolchain.env)
-
-    if toolchain.path:
-        env["PATH"] = f"{os.environ['PATH']}:{toolchain.path}"
+        env = toolchain.env
+    else:
+        env = os.environ
 
     if toolchain.sysroot:
         if "CFLAGS" not in env:
