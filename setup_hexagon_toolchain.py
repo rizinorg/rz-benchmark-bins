@@ -20,6 +20,16 @@ from helpers import (
 
 HEXAGON_TARGET_NAME = "hexagon-unknown-linux-musl"
 TOOLCHAIN_NAME = Path("clang+llvm-22.1.0-cross-hexagon-unknown-linux-musl")
+HEXAGON_TOOLCHAIN_DIR = Path(TOOLCHAINS_DIR / HEXAGON_TARGET_NAME)
+HEXAGON_TOOLCHAIN_BIN_DIR = Path(TOOLCHAINS_DIR / HEXAGON_TARGET_NAME / "bin")
+HEXAGON_TOOLCHAIN_TARGET_DIR = Path(
+    TOOLCHAINS_DIR / HEXAGON_TARGET_NAME / "target" / "hexagon"
+)
+
+
+class HexagonToolchain(Toolchain):
+    def get_disabled_features_binutils(self) -> list[str]:
+        return ["--disable-bfd", "--disable-libiberty", "--disable-bootstrap"]
 
 
 def get_architecture():
@@ -57,7 +67,7 @@ def main():
 
     if (
         not (TOOLCHAINS_DIR / TOOLCHAIN_NAME).exists()
-        and not (TOOLCHAINS_DIR / HEXAGON_TARGET_NAME).exists()
+        and not (HEXAGON_TOOLCHAIN_DIR).exists()
     ):
         unpack_tar(archive_path, TOOLCHAINS_DIR)
     else:
@@ -68,17 +78,33 @@ def main():
         # Move the toolchain dir in clang+llvm-.... to the target name dir.
         shutil.move(
             TOOLCHAINS_DIR / TOOLCHAIN_NAME / arch,
-            TOOLCHAINS_DIR / HEXAGON_TARGET_NAME,
+            HEXAGON_TOOLCHAIN_DIR,
         )
         shutil.rmtree(TOOLCHAINS_DIR / TOOLCHAIN_NAME)
 
 
 def toolchain_present() -> bool:
-    return (TOOLCHAINS_DIR / HEXAGON_TARGET_NAME).exists()
+    return HEXAGON_TOOLCHAIN_DIR.exists()
 
 
 def get_target() -> Toolchain:
-    return Toolchain(name=HEXAGON_TARGET_NAME, toolchain_type=ToolchainType.CrossExtern)
+    return HexagonToolchain(
+        target_name=HEXAGON_TARGET_NAME,
+        toolchain_type=ToolchainType.CrossExtern,
+        # sysroot=HEXAGON_TOOLCHAIN_DIR / "target" / "hexagon",
+        env={
+            "CC": str(HEXAGON_TOOLCHAIN_BIN_DIR / "hexagon-unknown-linux-musl-clang"),
+            "AR": str(HEXAGON_TOOLCHAIN_BIN_DIR / "hexagon-unknown-linux-musl-ar"),
+            "LD": str(HEXAGON_TOOLCHAIN_BIN_DIR / "hexagon-unknown-linux-musl-ld"),
+            "NM": str(HEXAGON_TOOLCHAIN_BIN_DIR / "hexagon-unknown-linux-musl-nm"),
+            "CPP": str(HEXAGON_TOOLCHAIN_BIN_DIR / "hexagon-unknown-linux-musl-clang"),
+            "CXX": str(
+                HEXAGON_TOOLCHAIN_BIN_DIR / "hexagon-unknown-linux-musl-clang++"
+            ),
+            "LDFLAGS": "-L" + str(HEXAGON_TOOLCHAIN_TARGET_DIR / "lib"),
+        },
+        inc_dirs=["/usr/include"],
+    )
 
 
 if __name__ == "__main__":

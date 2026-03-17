@@ -10,10 +10,14 @@ import shutil
 import subprocess
 import argparse
 from pathlib import Path
-from toolchain import get_supported_targets, LOCAL_MACHINE
+from toolchain import (
+    LOCAL_MACHINE,
+    Toolchain,
+    get_supported_toolchains,
+    get_toolchain_by_name,
+)
 from helpers import (
     unpack_tar,
-    check_sha256,
     SRC_DIR,
     ARCHIVES_DIR,
     TARGETS_DIR,
@@ -47,28 +51,53 @@ def prepare_source():
         unpack_tar(archive_path, SRC_DIR)
 
 
-def build_target(target):
+def build_target(toolchain: Toolchain):
     """Configure, make, and copy outputs for a specific target."""
-    log(f"Building for target: {target}")
+    log(f"Building for target: {toolchain}")
 
     subprocess.run(["make", "clean"], check=False)
     subprocess.run(
         ["find", ".", "-type", "f", "-name", "config.cache", "-delete"], check=False
     )
 
-    config_cmd = ["./configure", "--disable-shared"]
-    if target != LOCAL_MACHINE:
-        config_cmd.append(f"--host={target}")
+    env = dict()
+    config_cmd = [
+        "./configure",
+        "--disable-shared",
+    ] + toolchain.get_disabled_features_binutils()
 
-    subprocess.run(config_cmd, check=True)
-    subprocess.run(["make"], check=True)
+    if toolchain.target_name != LOCAL_MACHINE:
+        config_cmd.append(f"--host={toolchain.target_name}")
 
-    log(f"Build done for {target}")
+    if toolchain.inc_dirs:
+        for d in toolchain.inc_dirs:
+            config_cmd.append(f"--includedir={d}")
+
+    if toolchain.env:
+        env.update(toolchain.env)
+
+    if toolchain.path:
+        env["PATH"] = f"{os.environ['PATH']}:{toolchain.path}"
+
+    if toolchain.sysroot:
+        if "CFLAGS" not in env:
+            env["CFLAGS"] = ""
+        env["CFLAGS"] = f"--sysroot={toolchain.sysroot} " + env["CFLAGS"]
+
+    print("\nRun configure")
+    env_str = " ".join(f"{k}={v}" for k, v in env.items())
+    print(f"{env_str} {' '.join(config_cmd)}")
+    print("\n\n")
+
+    subprocess.run(config_cmd, env=env, check=True)
+    subprocess.run(["make"], env=env, check=True)
+
+    log(f"Build done for {toolchain}")
 
 
-def copy_executables(target):
+def copy_executables(toolchain: Toolchain):
     """Copy relevant executables to the target directory."""
-    output_dir = TARGETS_DIR / target / BINUTILS_NAME
+    output_dir = TARGETS_DIR / str(toolchain) / BINUTILS_NAME
     output_dir.mkdir(parents=True, exist_ok=True)
 
     local_arch = os.uname().machine.replace("_", "-").lower()
@@ -93,7 +122,7 @@ def copy_executables(target):
             print(f"{f} -> {output_dir}")
             shutil.copy(f, output_dir)
 
-    log(f"Build and copy for {target} complete.")
+    log(f"Build and copy for {toolchain} complete.")
 
 
 def main():
@@ -102,24 +131,24 @@ def main():
     parser.add_argument("-l", action="store_true", help="List target toolchains")
     args = parser.parse_args()
 
-    targets = get_supported_targets()
+    toolchains = get_supported_toolchains()
     if args.l or args.target:
-        if args.l or args.target not in targets:
+        if args.l or args.target not in [tc.target_name for tc in toolchains]:
             if not args.l:
                 print(f"Unsupported target: {args.target}\n")
 
             print("Supported targets:")
-            for t in targets:
+            for t in toolchains:
                 print(f"\t{t}")
             sys.exit(1)
-        targets = [args.target]
+        toolchains = [get_toolchain_by_name(args.target)]
 
     prepare_source()
 
     os.chdir(SRC_DIR / BINUTILS_NAME)
-    for target in targets:
-        build_target(target)
-        copy_executables(target)
+    for tc in toolchains:
+        build_target(tc)
+        copy_executables(tc)
 
 
 if __name__ == "__main__":
