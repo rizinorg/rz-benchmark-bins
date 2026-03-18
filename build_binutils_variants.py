@@ -84,7 +84,7 @@ def build_target(toolchain: Toolchain):
             else:
                 env = os.environ
 
-            env["CFLAGS"] = f"{' '.join(config.BUILD_STYLES["ignored_warnings"])} {linking} {optimize}"
+            env["CFLAGS"] = f"{' '.join(config.BUILD_STYLES["ignored_warnings"])} {linking} {optimize} -g"
             if toolchain.sysroot:
                 env["CFLAGS"] = f"--sysroot={toolchain.sysroot} " + env["CFLAGS"]
 
