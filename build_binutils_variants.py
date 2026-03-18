@@ -103,34 +103,26 @@ def build_target(toolchain: Toolchain):
 
             log(f"Build done for {toolchain}")
             copy_executables(toolchain, style)
+            binutils_path = Path("./binutils")
+            for f in binutils_path.rglob("*"):
+                if not toolchain.is_compatible_binary(f):
+                    continue
+                subprocess.run(
+                    [toolchain.get_strip(), "-s", str(f)], check=False
+                )
+            copy_executables(toolchain, f"{style}_stripped")
 
 
-def copy_executables(toolchain: Toolchain, config: str):
+
+def copy_executables(toolchain: Toolchain, sub_dir: str):
     """Copy relevant executables to the target directory."""
-    output_dir = TARGETS_DIR / str(toolchain.target_name) / BINUTILS_NAME / config
+    output_dir = TARGETS_DIR / str(toolchain.target_name) / BINUTILS_NAME / sub_dir
     output_dir.mkdir(parents=True, exist_ok=True)
 
     binutils_path = Path("./binutils")
 
-    if not binutils_path.exists():
-        return
-
     for f in binutils_path.rglob("*"):
-        if not f.is_file() or not os.access(f, os.X_OK):
-            continue
-
-        result = subprocess.run(
-            ["file", str(f)], capture_output=True, text=True, check=False
-        )
-
-        if (
-            result.stdout
-            and "ELF" in result.stdout
-            and (toolchain.target_name == LOCAL_MACHINE or
-                # Cross builds also place binaries of the local architecture in the
-                # build directory.
-                LOCAL_MACHINE.replace("_", "-").lower() not in result.stdout.lower())
-        ):
+        if toolchain.is_compatible_binary(f):
             print(f"{f} -> {output_dir}")
             shutil.copy(f, output_dir)
 

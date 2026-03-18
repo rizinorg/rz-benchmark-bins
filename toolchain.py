@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 Rot127 <rot127@posteo.com>
 #
 # SPDX-License-Identifier: LGPL-3.0-only
+import subprocess
+import os
 from pathlib import Path
 
 import platform
@@ -39,6 +41,28 @@ class Toolchain:
     def get_disabled_features_binutils(self) -> list[str]:
         return []
 
+    def get_strip(self) -> str:
+        if self.target_name == LOCAL_MACHINE:
+            return "strip"
+        return f"{self.target_name}-strip"
+
+    def is_compatible_binary(self, file: Path) -> bool:
+        if not file.is_file() or not os.access(file, os.X_OK):
+            return False
+
+        result = subprocess.run(
+            ["file", str(file)], capture_output=True, text=True, check=False)
+
+        if (
+            result.stdout
+            and "ELF" in result.stdout
+            and (self.target_name == LOCAL_MACHINE or
+            # Cross builds also place binaries of the local architecture in the
+            # build directory.
+            LOCAL_MACHINE.replace("_", "-").lower() not in result.stdout.lower())
+        ):
+            return True
+        return False
 
 LOCAL_MACHINE = platform.machine()
 
