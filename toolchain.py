@@ -50,35 +50,35 @@ SUPPORTED_TOOLCHAINS = [
     Toolchain(
         target_name="arm-linux-gnueabi", toolchain_type=ToolchainType.CrossPackaged
     ),
-    Toolchain(
-        target_name="arm-linux-gnueabihf", toolchain_type=ToolchainType.CrossPackaged
-    ),
+    # Toolchain(
+    #     target_name="arm-linux-gnueabihf", toolchain_type=ToolchainType.CrossPackaged
+    # ),
     Toolchain(target_name="i686-linux-gnu", toolchain_type=ToolchainType.CrossPackaged),
     Toolchain(
         target_name="mips64el-linux-gnuabi64",
         toolchain_type=ToolchainType.CrossPackaged,
     ),
-    Toolchain(
-        target_name="mips64-linux-gnuabi64", toolchain_type=ToolchainType.CrossPackaged
-    ),
-    Toolchain(
-        target_name="mipsel-linux-gnu", toolchain_type=ToolchainType.CrossPackaged
-    ),
-    Toolchain(
-        target_name="mipsisa32r6el-linux-gnu",
-        toolchain_type=ToolchainType.CrossPackaged,
-    ),
-    Toolchain(
-        target_name="mipsisa32r6-linux-gnu", toolchain_type=ToolchainType.CrossPackaged
-    ),
-    Toolchain(
-        target_name="mipsisa64r6el-linux-gnuabi64",
-        toolchain_type=ToolchainType.CrossPackaged,
-    ),
-    Toolchain(
-        target_name="mipsisa64r6-linux-gnuabi64",
-        toolchain_type=ToolchainType.CrossPackaged,
-    ),
+    # Toolchain(
+    #     target_name="mips64-linux-gnuabi64", toolchain_type=ToolchainType.CrossPackaged
+    # ),
+    # Toolchain(
+    #     target_name="mipsel-linux-gnu", toolchain_type=ToolchainType.CrossPackaged
+    # ),
+    # Toolchain(
+    #     target_name="mipsisa32r6el-linux-gnu",
+    #     toolchain_type=ToolchainType.CrossPackaged,
+    # ),
+    # Toolchain(
+    #     target_name="mipsisa32r6-linux-gnu", toolchain_type=ToolchainType.CrossPackaged
+    # ),
+    # Toolchain(
+    #     target_name="mipsisa64r6el-linux-gnuabi64",
+    #     toolchain_type=ToolchainType.CrossPackaged,
+    # ),
+    # Toolchain(
+    #     target_name="mipsisa64r6-linux-gnuabi64",
+    #     toolchain_type=ToolchainType.CrossPackaged,
+    # ),
     Toolchain(target_name="mips-linux-gnu", toolchain_type=ToolchainType.CrossPackaged),
     Toolchain(
         target_name="powerpc64le-linux-gnu", toolchain_type=ToolchainType.CrossPackaged
