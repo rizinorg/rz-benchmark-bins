@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: 2026 Rot127 <rot127@posteo.com>
 #
 # SPDX-License-Identifier: LGPL-3.0-only
+import config
 from setup_hexagon_toolchain import HEXAGON_TARGET_NAME
 
 import os
@@ -56,50 +57,59 @@ def build_target(toolchain: Toolchain):
     """Configure, make, and copy outputs for a specific target."""
     log(f"Building for target: {toolchain}")
 
-    subprocess.run(["make", "clean"], check=False)
-    subprocess.run(
-        ["find", ".", "-type", "f", "-name", "config.cache", "-delete"], check=False
-    )
+    for linking in config.BUILD_STYLES["linking"]:
+        for optimize in config.BUILD_STYLES["optimzie"]:
+            style = f"{linking}{optimize}".strip("-").replace("-", "_")
+            log(f"Building with: {style}")
 
-    config_cmd = [
-        "./configure",
-        "--disable-shared",
-    ] + toolchain.get_disabled_features_binutils()
+            subprocess.run(["make", "clean"], check=False)
+            subprocess.run(
+                ["find", ".", "-type", "f", "-name", "config.cache", "-delete"], check=False
+            )
 
-    if toolchain.target_name != LOCAL_MACHINE:
-        config_cmd.append(f"--host={toolchain.target_name}")
+            config_cmd = [
+                "./configure",
+                "--disable-shared",
+            ] + toolchain.get_disabled_features_binutils()
 
-    if toolchain.inc_dirs:
-        for d in toolchain.inc_dirs:
-            config_cmd.append(f"--includedir={d}")
+            if toolchain.target_name != LOCAL_MACHINE:
+                config_cmd.append(f"--host={toolchain.target_name}")
 
-    if toolchain.env:
-        env = toolchain.env
-    else:
-        env = os.environ
+            if toolchain.inc_dirs:
+                for d in toolchain.inc_dirs:
+                    config_cmd.append(f"--includedir={d}")
 
-    if toolchain.sysroot:
-        if "CFLAGS" not in env:
-            env["CFLAGS"] = ""
-        env["CFLAGS"] = f"--sysroot={toolchain.sysroot} " + env["CFLAGS"]
+            if toolchain.env:
+                env = toolchain.env
+            else:
+                env = os.environ
 
-    print("\nRun configure")
-    env_str = " ".join(f"{k}={v}" for k, v in env.items())
-    print(f"{env_str} {' '.join(config_cmd)}")
-    print("\n\n")
+            env["CFLAGS"] = f"{' '.join(config.BUILD_STYLES["ignored_warnings"])} {linking} {optimize}"
+            if toolchain.sysroot:
+                env["CFLAGS"] = f"--sysroot={toolchain.sysroot} " + env["CFLAGS"]
 
-    subprocess.run(config_cmd, env=env, check=True)
-    subprocess.run(["make"], env=env, check=True)
+            print("\nRun configure")
+            env_str = " ".join(f"{k}={v}" for k, v in env.items())
+            print(f"{env_str} {' '.join(config_cmd)}")
+            print("\n\n")
 
-    log(f"Build done for {toolchain}")
+            try:
+                subprocess.run(config_cmd, env=env, check=True)
+                subprocess.run(["make"], env=env, check=True)
+            except RuntimeError as e:
+                log(f"Build for {toolchain} FAILED")
+                log(f"{str(e)}")
+                continue
+
+            log(f"Build done for {toolchain}")
+            copy_executables(toolchain, style)
 
 
-def copy_executables(toolchain: Toolchain):
+def copy_executables(toolchain: Toolchain, config: str):
     """Copy relevant executables to the target directory."""
-    output_dir = TARGETS_DIR / str(toolchain.target_name) / BINUTILS_NAME
+    output_dir = TARGETS_DIR / str(toolchain.target_name) / BINUTILS_NAME / config
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    local_arch = os.uname().machine.replace("_", "-").lower()
     binutils_path = Path("./binutils")
 
     if not binutils_path.exists():
@@ -116,7 +126,10 @@ def copy_executables(toolchain: Toolchain):
         if (
             result.stdout
             and "ELF" in result.stdout
-            and local_arch not in result.stdout.lower()
+            and (toolchain.target_name == LOCAL_MACHINE or
+                # Cross builds also place binaries of the local architecture in the
+                # build directory.
+                LOCAL_MACHINE.replace("_", "-").lower() not in result.stdout.lower())
         ):
             print(f"{f} -> {output_dir}")
             shutil.copy(f, output_dir)
@@ -150,7 +163,6 @@ def main():
             print(f"A {tc} build for binutils is broken currently.")
             continue
         build_target(tc)
-        copy_executables(tc)
 
 
 if __name__ == "__main__":
